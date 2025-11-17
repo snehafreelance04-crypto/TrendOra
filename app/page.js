@@ -8,7 +8,7 @@ export default function Home() {
         className="
           bg-gradient-to-br from-[#C9E7FF] via-[#FDE2FF] to-[#FFD6A5] 
           h-[112vh]
-          w-[110%] md:w-[100%] md:h-[80vh]
+          w-[110%] md:w-[100%] md:h-[90%]
           relative
         "
       >
