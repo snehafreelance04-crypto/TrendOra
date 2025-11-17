@@ -7,16 +7,16 @@ export default function Home() {
       <div
         className="
           bg-gradient-to-br from-[#C9E7FF] via-[#FDE2FF] to-[#FFD6A5] 
-          min-h-screen 
-          w-full
+          h-[112vh]
+          w-[110%]
           relative
         "
       >
         {/* Header Section */}
-        <div className="w-full flex flex-col sm:flex-row items-center justify-between px-4 sm:px-6 md:px-8 pt-4 md:pt-6">
+        <div className="w-full flex flex-col sm:flex-row items-center justify-between px-3 sm:px-6 md:px-8 pt-3 md:pt-6">
           
           {/* Logo */}
-          <div className="mb-4 sm:mb-0">
+          <div className="mb-3 sm:mb-0 scale-90 sm:scale-100">
             <Logo_Name />
           </div>
 
@@ -29,7 +29,8 @@ export default function Home() {
                 className="
                   text-heading bg-gradient-to-r from-violet-300 to-pink-300 
                   font-bold rounded-full 
-                  text-sm px-5 py-2 md:text-sm md:px-6 md:py-2.5
+                  text-sm sm:text-base md:text-sm 
+                  px-6 py-2 sm:px-7 sm:py-2.5 md:px-6 md:py-2.5
                   shadow-md transition-all
                   hover:scale-105 hover:font-extrabold cursor-pointer
                 "
@@ -45,7 +46,8 @@ export default function Home() {
                 className="
                   text-heading bg-gradient-to-r from-violet-300 to-pink-300 
                   font-bold rounded-full 
-                  text-sm px-5 py-2 md:text-sm md:px-6 md:py-2.5
+                  text-sm sm:text-base md:text-sm 
+                  px-6 py-2 sm:px-7 sm:py-2.5 md:px-6 md:py-2.5
                   shadow-md transition-all
                   hover:scale-105 hover:font-extrabold cursor-pointer
                 "
@@ -57,11 +59,11 @@ export default function Home() {
         </div>
 
         {/* HERO TEXT */}
-        <div className="flex items-center justify-center px-4 sm:px-6 md:px-8 mt-16 sm:mt-24 md:mt-32 lg:mt-40">
+        <div className="flex items-center justify-center px-3 sm:px-6 md:px-8 mt-12 sm:mt-24 md:mt-32 lg:mt-40">
           <h1
             className="
               text-center 
-              text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl 
+              text-2xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl 
               font-bold 
               text-[#6e6255]
               max-w-full sm:max-w-[90%] md:max-w-[85%] lg:max-w-[80%]
@@ -73,16 +75,16 @@ export default function Home() {
         </div>
 
         {/* BUTTON */}
-        <div className="flex justify-center mt-12 sm:mt-16 md:mt-20 lg:mt-24 px-4">
+        <div className="flex justify-center mt-8 sm:mt-16 md:mt-20 lg:mt-24 px-3">
           <Link href="/shopping">
             <button
               className="
-                px-8 py-3 
+                px-6 py-2.5 
                 sm:px-10 sm:py-4 
                 md:px-12 md:py-5
                 lg:px-14 lg:py-6 
                 flex items-center gap-2 sm:gap-3 md:gap-4
-                text-base sm:text-lg md:text-xl lg:text-2xl 
+                text-sm sm:text-lg md:text-xl lg:text-2xl 
                 font-semibold
                 rounded-full
                 text-black
@@ -99,7 +101,7 @@ export default function Home() {
                 viewBox="0 0 24 24"
                 strokeWidth="1.8"
                 stroke="currentColor"
-                className="w-5 h-5 sm:w-6 sm:h-6 md:w-7 md:h-7"
+                className="w-4 h-4 sm:w-6 sm:h-6 md:w-7 md:h-7"
               >
                 <path
                   strokeLinecap="round"
