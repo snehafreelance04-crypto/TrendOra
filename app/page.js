@@ -7,9 +7,9 @@ export default function Home() {
       <div
         className="
           bg-gradient-to-br from-[#C9E7FF] via-[#FDE2FF] to-[#FFD6A5] 
-          h-[112vh]
-          w-[110%] md:w-[100%] 
-          relative
+          h-[100rem]
+          w-[140%] md:w-[100%] 
+          relative 
         "
       >
         {/* Header Section */}
