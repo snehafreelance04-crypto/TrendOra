@@ -30,7 +30,7 @@ export default function Home() {
                   text-heading bg-gradient-to-r from-violet-300 to-pink-300 
                   font-bold rounded-full 
                   text-sm sm:text-base md:text-sm 
-                  px-6 py-2 sm:px-7 sm:py-2.5 md:px-6 md:py-2.5
+                  px-6 py-4 sm:px-7 sm:py-2.5 md:px-6 md:py-2.5
                   shadow-md transition-all
                   hover:scale-105 hover:font-extrabold cursor-pointer
                 "
@@ -47,7 +47,7 @@ export default function Home() {
                   text-heading bg-gradient-to-r from-violet-300 to-pink-300 
                   font-bold rounded-full 
                   text-sm sm:text-base md:text-sm 
-                  px-6 py-2 sm:px-7 sm:py-2.5 md:px-6 md:py-2.5
+                  px-6 py-4 sm:px-7 sm:py-2.5 md:px-6 md:py-2.5
                   shadow-md transition-all
                   hover:scale-105 hover:font-extrabold cursor-pointer
                 "
@@ -63,11 +63,11 @@ export default function Home() {
           <h1
             className="
               text-center 
-              text-2xl sm:text-6xl md:text-5xl lg:text-6xl xl:text-7xl 
+              text-6xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl
               font-bold 
               text-[#6e6255]
               max-w-full sm:max-w-[90%] md:max-w-[85%] lg:max-w-[80%]
-              leading-tight
+              leading-tight mt-[5rem]
             "
           >
             Explore AI-Smart Deals & Personalized Picks
@@ -79,7 +79,7 @@ export default function Home() {
           <Link href="/shopping">
             <button
               className="
-                px-6 py-2.5 
+                px-6 py-5.5 mt-[3rem]
                 sm:px-10 sm:py-4 
                 md:px-12 md:py-2
                 lg:px-14 lg:py-6 
