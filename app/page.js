@@ -7,9 +7,10 @@ export default function Home() {
       <div
         className="
           bg-gradient-to-br from-[#C9E7FF] via-[#FDE2FF] to-[#FFD6A5] 
-          h-[100rem]
-          w-[140%] md:w-[100%] 
+          min-h-screen
+          w-full
           relative 
+          overflow-x-hidden
         "
       >
         {/* Header Section */}
@@ -63,7 +64,7 @@ export default function Home() {
           <h1
             className="
               text-center 
-              text-6xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl
+              text-4xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl
               font-bold 
               text-[#6e6255]
               max-w-full sm:max-w-[90%] md:max-w-[85%] lg:max-w-[80%]
