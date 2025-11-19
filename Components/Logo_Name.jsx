@@ -2,8 +2,8 @@ import React from 'react'
 
 const Logo_Name = () => {
   return (
-    <div className='text-4xl font-bold p-5 mx-3 text-black w-[20%] ml-[3rem] '>
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 160" width="500" height="150">
+    <div className='text-3xl font-bold p-5 mx-3 text-black w-[20rem] ml-[3rem] '>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 160" width="450" height="150">
   <defs>
     <linearGradient id="gradD" x1="0" y1="0" x2="4" y2="0">
       <stop offset="0%" stop-color="#FF6A6A"/>
