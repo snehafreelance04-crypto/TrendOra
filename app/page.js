@@ -13,7 +13,7 @@ export default function Home() {
         "
       >
         {/* Header Section */}
-        <div className="w-full flex flex-col sm:flex-row items-center justify-between px-3 sm:px-6 md:px-8 pt-3 md:pt-6">
+        <div className="w-full flex flex-col sm:flex-row items-center justify-between px-3 sm:px-6 md:px-8 ">
           
           {/* Logo */}
           <div className="mb-3 sm:mb-0 scale-90 sm:scale-100">
@@ -59,11 +59,11 @@ export default function Home() {
         </div>
 
         {/* HERO TEXT */}
-        <div className="flex items-center justify-center px-3 sm:px-6 md:px-8 mt-12 sm:mt-24 md:mt-32 lg:mt-40">
+        <div className="flex items-center justify-center px-3 sm:px-6 md:px-8  sm:mt-24 ">
           <h1
             className="
               text-center 
-              text-2xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl 
+              text-2xl sm:text-6xl md:text-5xl lg:text-6xl xl:text-7xl 
               font-bold 
               text-[#6e6255]
               max-w-full sm:max-w-[90%] md:max-w-[85%] lg:max-w-[80%]
@@ -75,13 +75,13 @@ export default function Home() {
         </div>
 
         {/* BUTTON */}
-        <div className="flex justify-center mt-8 sm:mt-16 md:mt-20 lg:mt-24 px-3">
+        <div className="flex justify-center  px-3">
           <Link href="/shopping">
             <button
               className="
                 px-6 py-2.5 
                 sm:px-10 sm:py-4 
-                md:px-12 md:py-5
+                md:px-12 md:py-2
                 lg:px-14 lg:py-6 
                 flex items-center gap-2 sm:gap-3 md:gap-4
                 text-sm sm:text-lg md:text-xl lg:text-2xl 
