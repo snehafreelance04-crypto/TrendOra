@@ -24,7 +24,7 @@ export default function Home() {
           whileInView={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
           viewport={{ amount: 0.25 }}
-          className="w-full flex flex-col sm:flex-row items-center justify-between px-3 sm:px-6 md:px-8 pt-6"
+          className="w-full flex flex-col sm:flex-row items-center justify-between px-3 sm:px-6 md:px-8 "
         >
           <div className="mb-3 sm:mb-0 scale-90 sm:scale-100">
             <Logo_Name />

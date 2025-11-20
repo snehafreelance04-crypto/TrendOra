@@ -14,7 +14,7 @@ const Logo_Name = () => {
             alt="logo"
             width={400}
             height={200}
-            className="w-full h-full object-contain"
+            className="w-full h-full object-contain ml-[31px]"
           />
         </div>
 
