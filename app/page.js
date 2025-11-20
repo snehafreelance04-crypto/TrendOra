@@ -400,8 +400,6 @@ export default function Home() {
           <p className="text-sm opacity-80 mt-1">© 2025 TrendOra • All Rights Reserved</p>
         </motion.footer>
 
-
-        <div className="h-[150px]"></div>
       </div>
     </>
   );
