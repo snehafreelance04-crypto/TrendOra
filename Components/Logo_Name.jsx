@@ -8,7 +8,7 @@ const Logo_Name = () => {
       <div className='flex items-center font-bold p-5 ml-[1rem] w-auto'>
 
         {/* Responsive Logo Image Wrapper */}
-        <div className="w-[150px] h-[120px] md:w-[160px] md:h-[120px]">
+        <div className="w-[150px] h-[120px] md:w-[160px] md:h-[140px]">
           <Image
             src="/Images/Logo1.png"
             alt="logo"

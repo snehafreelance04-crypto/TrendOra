@@ -38,7 +38,9 @@ export default function Home() {
                 font-bold rounded-full text-sm sm:text-base md:text-sm 
                 px-6 py-4 sm:px-7 sm:py-2.5 shadow-md cursor-pointer
                 transition-all duration-300
-                hover:scale-110 hover:shadow-lg hover:brightness-110
+                hover:scale-110
+                hover:font-bold
+                hover:shadow-lg hover:brightness-110
               ">
                 Login
               </button>
@@ -51,7 +53,9 @@ export default function Home() {
                 font-bold rounded-full text-sm sm:text-base md:text-sm 
                 px-6 py-4 sm:px-7 sm:py-2.5 shadow-md cursor-pointer
                 transition-all duration-300
-                hover:scale-110 hover:shadow-lg hover:brightness-110
+                hover:scale-110 
+                  hover:font-bold
+                  hover:shadow-lg hover:brightness-110
               ">
                 Sign Up
               </button>
@@ -72,9 +76,16 @@ export default function Home() {
           viewport={{ amount: 0.25 }}
           className="flex flex-col items-center justify-center px-6 mt-20"
         >
-          <h1 className="text-center text-4xl sm:text-5xl lg:text-7xl font-bold text-[#6e6255] leading-tight">
-            TrendOra- Your Smart Shopping Destination
-            
+          <h1 className="text-center text-4xl sm:text-5xl lg:text-6xl font-extrabold leading-tight tracking-wide">
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-black 
+             to-pink-700 drop-shadow-2xl">
+              TrendOra
+            </span>
+            <span className="text-[#37332d] font-black">- Your Smart Shopping </span>
+            <span className="text-transparent bg-clip-text bg-[#37332d] font-black
+            drop-shadow-2xl">
+              Destination
+            </span>
           </h1>
         </motion.div>
 
@@ -91,7 +102,9 @@ export default function Home() {
               className="px-10 py-4 text-lg sm:text-xl font-semibold rounded-full
                 bg-gradient-to-br from-[#d5dae6] via-[#ce3e9e] to-[#312E81]
                 shadow-[0_8px_20px_rgba(255,150,100,0.45)]
-                hover:scale-110 hover:shadow-[0_12px_30px_rgba(255,150,100,0.65)]
+                hover:scale-110 
+                hover:text-black
+                hover:shadow-[0_12px_30px_rgba(255,150,100,0.65)]
                 hover:from-[#ce3e9e] hover:via-[#312E81] hover:to-[#d5dae6]
                 transition-all duration-300 text-white
                 active:scale-95 cursor-pointer"
@@ -114,7 +127,7 @@ export default function Home() {
           whileInView={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.7 }}
           viewport={{ amount: 0.25 }}
-          className="mt-24 px-6 text-center"
+          className="mt-15 px-6 text-center"
         >
           <div className="inline-block">
             <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold flex items-center justify-center gap-2">
@@ -231,7 +244,7 @@ export default function Home() {
                 />
 
                 <h4 className="font-bold mt-3 text-gray-800">{item.name}</h4>
-          
+
               </motion.div>
             ))}
           </div>
