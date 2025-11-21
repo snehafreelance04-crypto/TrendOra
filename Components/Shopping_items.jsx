@@ -10,7 +10,6 @@ export default function Shopping_items() {
     const [isCartOpen, setIsCartOpen] = useState(false);
     const doc = new jsPDF();
 
-    // NEW
     const [addedItemIds, setAddedItemIds] = useState([]);
     const [showOrderPopup, setShowOrderPopup] = useState(false);
 
@@ -31,7 +30,6 @@ export default function Shopping_items() {
             ? data
             : data.filter((item) => item.category === activeCategory);
 
-    // Add to cart
     const addToCart = (product) => {
         setCartItems((prev) => {
             const existingItem = prev.find((item) => item.id === product.id);
@@ -45,35 +43,59 @@ export default function Shopping_items() {
             return [...prev, { ...product, quantity: 1 }];
         });
 
-        // NEW – save multiple added button states
         setAddedItemIds((prev) => [...prev, product.id]);
     };
 
-    // Remove from cart
     const removeFromCart = (productId) => {
         setCartItems((prev) => prev.filter((item) => item.id !== productId));
     };
 
-    // Download invoice
+    // Convert image to base64 for jsPDF
+    const toBase64 = (url) =>
+        fetch(url)
+            .then((response) => response.blob())
+            .then(
+                (blob) =>
+                    new Promise((resolve) => {
+                        const reader = new FileReader();
+                        reader.onloadend = () => resolve(reader.result);
+                        reader.readAsDataURL(blob);
+                    })
+            );
+
+    // ===============================
+    // UPDATED INVOICE FUNCTION (with LOGO)
+    // ===============================
     const download = async () => {
         const { jsPDF } = await import("jspdf");
         const doc = new jsPDF();
         let y = 20;
 
-        doc.setFillColor(79, 70, 229);
+        // Load your TrendOra logo
+        const logoBase64 = await toBase64("/Images/Logo1.png");
+
+        // Header background
+        doc.setFillColor(37, 99, 235);  // Tailwind blue-600
         doc.rect(0, 0, 210, 45, "F");
 
+
+        // Add Logo (left side)
+        doc.addImage(logoBase64, "PNG", 10, 8, 25, 25);
+
+        // Main Title
         doc.setTextColor(255, 255, 255);
         doc.setFont("Helvetica", "bold");
         doc.setFontSize(32);
-        doc.text("TrendOra", 105, 20, { align: "center" });
+        doc.text("TrendOra", 110, 20, { align: "center" });
 
         doc.setFontSize(11);
         doc.setFont("Helvetica", "normal");
-        doc.text("AI-Powered Smart Shopping Experience", 105, 28, { align: "center" });
+        doc.text("AI-Powered Smart Shopping Experience", 110, 28, { align: "center" });
 
         doc.setFontSize(9);
-        doc.text("www.trendora.com | support@trendora.com | +91-XXXX-XXXXXX", 105, 35, { align: "center" });
+        doc.text("www.trendora.com | support@trendora.com | +91-XXXX-XXXXXX", 110, 35, {
+            align: "center",
+        });
 
         y = 55;
 
@@ -113,7 +135,6 @@ export default function Shopping_items() {
         doc.setFillColor(240, 240, 240);
         doc.rect(10, y, 190, 8, "F");
 
-        doc.setTextColor(0, 0, 0);
         doc.setFont("Helvetica", "bold");
         doc.setFontSize(12);
         doc.text("ITEM DESCRIPTION", 15, y + 7);
@@ -206,9 +227,8 @@ export default function Shopping_items() {
             )}
 
             <div
-                className={`fixed top-0 right-0 h-full w-full sm:w-96 bg-white shadow-2xl z-50 transform transition-transform duration-300 ${
-                    isCartOpen ? "translate-x-0" : "translate-x-full"
-                } overflow-y-auto`}
+                className={`fixed top-0  right-0 h-full w-full sm:w-96 bg-white shadow-2xl z-50 transform transition-transform duration-300 ${isCartOpen ? "translate-x-0" : "translate-x-full"
+                    } overflow-y-auto`}
             >
                 <div className="p-6">
                     <h2 className="text-2xl font-bold mb-4">Shopping Cart</h2>
@@ -260,11 +280,10 @@ export default function Shopping_items() {
             <div className="flex flex-wrap gap-4 justify-center mb-12">
                 <button
                     onClick={() => setActiveCategory("all")}
-                    className={`px-6 py-2 rounded-full font-semibold ${
-                        activeCategory === "all"
+                    className={`px-6 py-2 rounded-full font-semibold ${activeCategory === "all"
                             ? "bg-gradient-to-r from-[#86A8E7] to-[#91EAE4] text-white scale-110"
                             : "bg-white/60 border"
-                    }`}
+                        }`}
                 >
                     All Products
                 </button>
@@ -273,11 +292,10 @@ export default function Shopping_items() {
                     <button
                         key={cat}
                         onClick={() => setActiveCategory(cat)}
-                        className={`px-6 py-2 rounded-full font-semibold ${
-                            activeCategory === cat
+                        className={`px-6 py-2 rounded-full font-semibold ${activeCategory === cat
                                 ? "bg-gradient-to-r from-[#7F7FD5] to-[#91EAE4] text-white scale-110"
                                 : "bg-white/70 border"
-                        }`}
+                            }`}
                     >
                         {cat}
                     </button>
@@ -305,11 +323,10 @@ export default function Shopping_items() {
                             {/* ADD TO CART BUTTON */}
                             <button
                                 onClick={() => addToCart(item)}
-                                className={`px-4 py-2 rounded-full text-sm transition-all ${
-                                    addedItemIds.includes(item.id)
+                                className={`px-4 py-2 rounded-full text-sm transition-all ${addedItemIds.includes(item.id)
                                         ? "bg-green-600 text-white scale-105"
                                         : "bg-blue-900 text-white hover:bg-blue-800"
-                                }`}
+                                    }`}
                             >
                                 {addedItemIds.includes(item.id)
                                     ? "Added to cart ✓"

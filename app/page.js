@@ -4,6 +4,8 @@ import { motion } from "framer-motion";
 import Link from "next/link";
 import Image from "next/image";
 import Logo_Name from "@/Components/Logo_Name";
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faBagShopping } from '@fortawesome/free-solid-svg-icons';
 
 export default function Home() {
   return (
@@ -99,7 +101,7 @@ export default function Home() {
         >
           <Link href="/shopping">
             <button
-              className="px-10 py-4 text-lg sm:text-xl font-semibold rounded-full
+              className="px-10 py-4 text-lg gap-5 flex sm:text-xl font-semibold rounded-full
                 bg-gradient-to-br from-[#d5dae6] via-[#ce3e9e] to-[#312E81]
                 shadow-[0_8px_20px_rgba(255,150,100,0.45)]
                 hover:scale-110 
@@ -109,7 +111,9 @@ export default function Home() {
                 transition-all duration-300 text-white
                 active:scale-95 cursor-pointer"
             >
-              Start Shopping
+              <div className="pl-2">
+                <FontAwesomeIcon icon={faBagShopping} /></div>
+              <p> Start Shopping</p>
             </button>
           </Link>
         </motion.div>

@@ -2,6 +2,9 @@
 
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faUserPlus,faEye,faEyeSlash} from '@fortawesome/free-solid-svg-icons';
+  
 
 const Signup = () => {
   const router = useRouter();
@@ -56,8 +59,13 @@ const Signup = () => {
         )}
 
         {/* Form */}
-        <div className={`w-[95%] max-w-[500px] bg-white p-4 sm:p-6 md:p-8 rounded-xl shadow-lg transition ${popup ? "blur-sm pointer-events-none" : ""}`}>
-          <h2 className="text-xl sm:text-2xl font-bold text-center mb-4">Sign Up</h2>
+        <div className={`w-[95%] max-w-[500px]  bg-white p-4 sm:p-6 md:p-8 rounded-xl shadow-lg transition ${popup ? "blur-sm pointer-events-none" : ""}`}>
+          <h2 className="text-xl flex gap-20 sm:text-2xl font-bold text-center mb-4">
+            <div className="pl-16">
+              <FontAwesomeIcon icon={faUserPlus} /></div>
+             <p className="text-blue-950">
+             <u> Sign Up</u></p></h2>
+          
 
           <input
             type="text"
@@ -86,9 +94,9 @@ const Signup = () => {
             <button
               type="button"
               onClick={() => setShow(!show)}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-xs sm:text-sm text-purple-600"
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-xs sm:text-sm text-black"
             >
-              {show ? "Hide" : "Show"}
+              {show ? <FontAwesomeIcon icon={faEyeSlash} /> : <FontAwesomeIcon icon={faEye} />}
             </button>
           </div>
 
