@@ -1,5 +1,6 @@
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import trendoraFavicon from "./assets/trendora-favicon.png";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -13,9 +14,8 @@ const geistMono = Geist_Mono({
 
 export const metadata = {
   title: "TrendOra",
-
-  icons:{
-    icon:"/Logo1.png"
+  icons: {
+    icon: trendoraFavicon.src,
   },
   description: "Your Smart Shopping Destination",
 };
@@ -23,6 +23,13 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
+      <head>
+        <link
+          rel="icon"
+          type="image/png"
+          href={trendoraFavicon.src}
+        />
+      </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
