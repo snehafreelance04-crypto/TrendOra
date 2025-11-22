@@ -64,7 +64,7 @@ export default function Shopping_items() {
             );
 
     // ===============================
-    // UPDATED INVOICE FUNCTION (Mobile-Friendly)
+    // UPDATED INVOICE FUNCTION (iOS-Compatible)
     // ===============================
     const download = async () => {
         try {
@@ -187,21 +187,45 @@ export default function Shopping_items() {
             doc.text("TOTAL:", 130, y + 3);
             doc.text(`₹${totalPrice}`, 195, y + 3, { align: "right" });
 
-            // ✅ MOBILE FIX: Use blob + link for better mobile support
-            const pdfBlob = doc.output('blob');
+            // ✅ iOS-SPECIFIC FIX: Multiple fallback methods
             const fileName = `TrendOra_Invoice_${invoiceNumber}.pdf`;
-
-            // Check if mobile device
-            const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-
-            if (isMobile) {
-                // Mobile: Create download link
+            
+            // Detect iOS specifically
+            const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+            
+            if (isIOS) {
+                // iOS Safari: Open in new tab (most reliable method)
+                const pdfDataUri = doc.output('dataurlstring');
+                const newWindow = window.open();
+                
+                if (newWindow) {
+                    newWindow.document.write(
+                        `<html>
+                            <head>
+                                <title>${fileName}</title>
+                                <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                            </head>
+                            <body style="margin:0">
+                                <embed width="100%" height="100%" src="${pdfDataUri}" type="application/pdf">
+                            </body>
+                        </html>`
+                    );
+                    newWindow.document.close();
+                } else {
+                    // Fallback if popup blocked
+                    alert("Please allow pop-ups to download your invoice");
+                }
+            } else {
+                // Android & Desktop: Use blob download
+                const pdfBlob = doc.output('blob');
                 const url = URL.createObjectURL(pdfBlob);
                 const link = document.createElement('a');
                 link.href = url;
                 link.download = fileName;
                 link.style.display = 'none';
                 document.body.appendChild(link);
+                
+                // Trigger download
                 link.click();
                 
                 // Cleanup
@@ -209,9 +233,6 @@ export default function Shopping_items() {
                     document.body.removeChild(link);
                     URL.revokeObjectURL(url);
                 }, 100);
-            } else {
-                // Desktop: Use regular save
-                doc.save(fileName);
             }
 
         } catch (error) {
