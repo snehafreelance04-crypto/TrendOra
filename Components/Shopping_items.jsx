@@ -64,139 +64,160 @@ export default function Shopping_items() {
             );
 
     // ===============================
-    // UPDATED INVOICE FUNCTION (with LOGO)
+    // UPDATED INVOICE FUNCTION (Mobile-Friendly)
     // ===============================
     const download = async () => {
-        const { jsPDF } = await import("jspdf");
-        const doc = new jsPDF();
-        let y = 20;
+        try {
+            const { jsPDF } = await import("jspdf");
+            const doc = new jsPDF();
+            let y = 20;
 
-        // Load your TrendOra logo
-        const logoBase64 = await toBase64("/Images/Logo1.png");
+            // Load your TrendOra logo
+            const logoBase64 = await toBase64("/Images/Logo1.png");
 
-        // Header background
-        doc.setFillColor(37, 99, 235);  // Tailwind blue-600
-        doc.rect(0, 0, 210, 45, "F");
+            // Header background
+            doc.setFillColor(37, 99, 235);  // Tailwind blue-600
+            doc.rect(0, 0, 210, 45, "F");
 
+            // Add Logo (left side)
+            doc.addImage(logoBase64, "PNG", 10, 8, 25, 25);
 
-        // Add Logo (left side)
-        doc.addImage(logoBase64, "PNG", 10, 8, 25, 25);
+            // Main Title
+            doc.setTextColor(255, 255, 255);
+            doc.setFont("Helvetica", "bold");
+            doc.setFontSize(32);
+            doc.text("TrendOra", 110, 20, { align: "center" });
 
-        // Main Title
-        doc.setTextColor(255, 255, 255);
-        doc.setFont("Helvetica", "bold");
-        doc.setFontSize(32);
-        doc.text("TrendOra", 110, 20, { align: "center" });
+            doc.setFontSize(11);
+            doc.setFont("Helvetica", "normal");
+            doc.text("AI-Powered Smart Shopping Experience", 110, 28, { align: "center" });
 
-        doc.setFontSize(11);
-        doc.setFont("Helvetica", "normal");
-        doc.text("AI-Powered Smart Shopping Experience", 110, 28, { align: "center" });
+            doc.setFontSize(9);
+            doc.text("www.trendora.com | support@trendora.com | +91-XXXX-XXXXXX", 110, 35, {
+                align: "center",
+            });
 
-        doc.setFontSize(9);
-        doc.text("www.trendora.com | support@trendora.com | +91-XXXX-XXXXXX", 110, 35, {
-            align: "center",
-        });
+            y = 55;
 
-        y = 55;
+            doc.setTextColor(0, 0, 0);
+            doc.setFont("Helvetica", "bold");
+            doc.setFontSize(24);
+            doc.text("INVOICE", 10, y);
 
-        doc.setTextColor(0, 0, 0);
-        doc.setFont("Helvetica", "bold");
-        doc.setFontSize(24);
-        doc.text("INVOICE", 10, y);
+            doc.setFontSize(10);
+            doc.setFont("Helvetica", "normal");
+            const invoiceNumber = `INV-${Date.now().toString().slice(-8)}`;
+            const invoiceDate = new Date().toLocaleDateString("en-IN", {
+                year: "numeric",
+                month: "long",
+                day: "numeric",
+            });
 
-        doc.setFontSize(10);
-        doc.setFont("Helvetica", "normal");
-        const invoiceNumber = `INV-${Date.now().toString().slice(-8)}`;
-        const invoiceDate = new Date().toLocaleDateString("en-IN", {
-            year: "numeric",
-            month: "long",
-            day: "numeric",
-        });
+            doc.text(`Invoice No: ${invoiceNumber}`, 200, y, { align: "right" });
+            doc.text(`Date: ${invoiceDate}`, 200, y + 6, { align: "right" });
 
-        doc.text(`Invoice No: ${invoiceNumber}`, 200, y, { align: "right" });
-        doc.text(`Date: ${invoiceDate}`, 200, y + 6, { align: "right" });
+            y += 20;
 
-        y += 20;
-
-        doc.setDrawColor(220, 220, 220);
-        doc.setLineWidth(0.5);
-        doc.rect(10, y, 190, 20);
-
-        doc.setFont("Helvetica", "bold");
-        doc.setFontSize(11);
-        doc.text("BILL TO:", 15, y + 7);
-
-        doc.setFont("Helvetica", "normal");
-        doc.setFontSize(10);
-        doc.text("Customer Name", 15, y + 13);
-
-        y += 30;
-
-        doc.setFillColor(240, 240, 240);
-        doc.rect(10, y, 190, 8, "F");
-
-        doc.setFont("Helvetica", "bold");
-        doc.setFontSize(12);
-        doc.text("ITEM DESCRIPTION", 15, y + 7);
-        doc.text("QTY", 145, y + 7, { align: "center" });
-        doc.text("PRICE", 165, y + 7, { align: "center" });
-        doc.text("AMOUNT", 198, y + 7, { align: "right" });
-
-        y += 12;
-
-        cartItems.forEach((item, index) => {
             doc.setDrawColor(220, 220, 220);
-            doc.setLineWidth(0.3);
-            doc.rect(10, y - 5, 190, 8);
+            doc.setLineWidth(0.5);
+            doc.rect(10, y, 190, 20);
 
-            const name = item.title.length > 45 ? item.title.slice(0, 45) + "..." : item.title;
+            doc.setFont("Helvetica", "bold");
+            doc.setFontSize(11);
+            doc.text("BILL TO:", 15, y + 7);
 
-            doc.text(`${index + 1}. ${name}`, 15, y);
-            doc.text(`${item.quantity}`, 145, y, { align: "center" });
-            doc.text(`₹${item.price}`, 165, y, { align: "center" });
-            doc.text(`₹${item.price * item.quantity}`, 195, y, { align: "right" });
+            doc.setFont("Helvetica", "normal");
+            doc.setFontSize(10);
+            doc.text("Customer Name", 15, y + 13);
 
+            y += 30;
+
+            doc.setFillColor(240, 240, 240);
+            doc.rect(10, y, 190, 8, "F");
+
+            doc.setFont("Helvetica", "bold");
+            doc.setFontSize(12);
+            doc.text("ITEM DESCRIPTION", 15, y + 7);
+            doc.text("QTY", 145, y + 7, { align: "center" });
+            doc.text("PRICE", 165, y + 7, { align: "center" });
+            doc.text("AMOUNT", 198, y + 7, { align: "right" });
+
+            y += 12;
+
+            cartItems.forEach((item, index) => {
+                doc.setDrawColor(220, 220, 220);
+                doc.setLineWidth(0.3);
+                doc.rect(10, y - 5, 190, 8);
+
+                const name = item.title.length > 45 ? item.title.slice(0, 45) + "..." : item.title;
+
+                doc.text(`${index + 1}. ${name}`, 15, y);
+                doc.text(`${item.quantity}`, 145, y, { align: "center" });
+                doc.text(`₹${item.price}`, 165, y, { align: "center" });
+                doc.text(`₹${item.price * item.quantity}`, 195, y, { align: "right" });
+
+                y += 8;
+
+                if (y > 260) {
+                    doc.addPage();
+                    y = 20;
+                }
+            });
+
+            y += 5;
+
+            const totalPrice = cartItems.reduce(
+                (sum, item) => sum + item.price * item.quantity,
+                0
+            );
+
+            doc.line(120, y, 200, y);
             y += 8;
 
-            if (y > 260) {
-                doc.addPage();
-                y = 20;
+            doc.text("Subtotal:", 130, y);
+            doc.text(`₹${totalPrice}`, 195, y, { align: "right" });
+            y += 8;
+
+            doc.setFillColor(79, 70, 229);
+            doc.rect(120, y - 5, 98, 12, "F");
+
+            doc.setTextColor(255, 255, 255);
+            doc.setFont("Helvetica", "bold");
+            doc.setFontSize(14);
+            doc.text("TOTAL:", 130, y + 3);
+            doc.text(`₹${totalPrice}`, 195, y + 3, { align: "right" });
+
+            // ✅ MOBILE FIX: Use blob + link for better mobile support
+            const pdfBlob = doc.output('blob');
+            const fileName = `TrendOra_Invoice_${invoiceNumber}.pdf`;
+
+            // Check if mobile device
+            const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+
+            if (isMobile) {
+                // Mobile: Create download link
+                const url = URL.createObjectURL(pdfBlob);
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = fileName;
+                link.style.display = 'none';
+                document.body.appendChild(link);
+                link.click();
+                
+                // Cleanup
+                setTimeout(() => {
+                    document.body.removeChild(link);
+                    URL.revokeObjectURL(url);
+                }, 100);
+            } else {
+                // Desktop: Use regular save
+                doc.save(fileName);
             }
-        });
 
-        y += 5;
-
-        const totalPrice = cartItems.reduce(
-            (sum, item) => sum + item.price * item.quantity,
-            0
-        );
-
-        doc.line(120, y, 200, y);
-        y += 8;
-
-        doc.text("Subtotal:", 130, y);
-        doc.text(`₹${totalPrice}`, 195, y, { align: "right" });
-        y += 8;
-
-        doc.setFillColor(79, 70, 229);
-        doc.rect(120, y - 5, 98, 12, "F");
-
-        doc.setTextColor(255, 255, 255);
-        doc.setFont("Helvetica", "bold");
-        doc.setFontSize(14);
-        doc.text("TOTAL:", 130, y + 3);
-        doc.text(`₹${totalPrice}`, 195, y + 3, { align: "right" });
-
-        // Mobile-friendly download approach
-        const pdfBlob = doc.output('blob');
-        const url = URL.createObjectURL(pdfBlob);
-        const link = document.createElement('a');
-        link.href = url;
-        link.download = `TrendOra_Invoice_${invoiceNumber}.pdf`;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        URL.revokeObjectURL(url);
+        } catch (error) {
+            console.error("Error generating invoice:", error);
+            alert("Failed to generate invoice. Please try again.");
+        }
     };
 
     const totalPrice = cartItems.reduce(
