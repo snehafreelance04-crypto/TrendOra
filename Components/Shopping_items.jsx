@@ -50,7 +50,6 @@ export default function Shopping_items() {
         setCartItems((prev) => prev.filter((item) => item.id !== productId));
     };
 
-    // Convert image to base64 for jsPDF
     const toBase64 = (url) =>
         fetch(url)
             .then((response) => response.blob())
@@ -63,26 +62,18 @@ export default function Shopping_items() {
                     })
             );
 
-    // ===============================
-    // UPDATED INVOICE FUNCTION (with LOGO)
-    // ===============================
     const download = async () => {
         const { jsPDF } = await import("jspdf");
         const doc = new jsPDF();
         let y = 20;
 
-        // Load your TrendOra logo
         const logoBase64 = await toBase64("/Images/Logo1.png");
 
-        // Header background
-        doc.setFillColor(37, 99, 235);  // Tailwind blue-600
+        doc.setFillColor(37, 99, 235);
         doc.rect(0, 0, 210, 45, "F");
 
-
-        // Add Logo (left side)
         doc.addImage(logoBase64, "PNG", 10, 8, 25, 25);
 
-        // Main Title
         doc.setTextColor(255, 255, 255);
         doc.setFont("Helvetica", "bold");
         doc.setFontSize(32);
@@ -187,7 +178,13 @@ export default function Shopping_items() {
         doc.text("TOTAL:", 130, y + 3);
         doc.text(`₹${totalPrice}`, 195, y + 3, { align: "right" });
 
-        doc.save(`TrendOra_Invoice_${invoiceNumber}.pdf`);
+        // 🔹 Updated: Mobile-safe PDF handling
+        const fileName = `TrendOra_Invoice_${invoiceNumber}.pdf`;
+        if (/Android|iPhone|iPad|iPod/i.test(navigator.userAgent)) {
+            doc.output('dataurlnewwindow');
+        } else {
+            doc.save(fileName);
+        }
     };
 
     const totalPrice = cartItems.reduce(
@@ -207,7 +204,7 @@ export default function Shopping_items() {
                 {/* Cart */}
                 <button
                     onClick={() => setIsCartOpen(!isCartOpen)}
-                    className="relative bg-gradient-to-r from-[#7F7FD5] to-[#91EAE4] text-white  p-4 rounded-full shadow-xl hover:scale-110 transition-all duration-300"
+                    className="relative bg-gradient-to-r from-[#7F7FD5] to-[#91EAE4] text-white ml-0 lg:ml-[40%] p-4 rounded-full shadow-xl hover:scale-110 transition-all duration-300"
                 >
                     🛒
                     {cartItems.length > 0 && (
