@@ -187,37 +187,98 @@ export default function Shopping_items() {
             doc.text("TOTAL:", 130, y + 3);
             doc.text(`₹${totalPrice}`, 195, y + 3, { align: "right" });
 
-            // ✅ iOS-SPECIFIC FIX: Multiple fallback methods
+            // ✅ iOS-specific function to open PDF (defined first)
+            const openPdfForIOS = (pdfDataUri, fileName) => {
+                // Open PDF in new window - iOS Safari will show native PDF viewer with share button
+                const newWindow = window.open('', '_blank');
+                
+                if (newWindow) {
+                    newWindow.document.write(`
+                        <!DOCTYPE html>
+                        <html>
+                            <head>
+                                <meta charset="UTF-8">
+                                <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+                                <title>${fileName}</title>
+                                <style>
+                                    body {
+                                        margin: 0;
+                                        padding: 0;
+                                        overflow: hidden;
+                                        background: #000;
+                                    }
+                                    embed {
+                                        width: 100vw;
+                                        height: 100vh;
+                                        border: none;
+                                    }
+                                    .instructions {
+                                        position: fixed;
+                                        bottom: 20px;
+                                        left: 50%;
+                                        transform: translateX(-50%);
+                                        background: rgba(0,0,0,0.8);
+                                        color: white;
+                                        padding: 12px 20px;
+                                        border-radius: 20px;
+                                        font-size: 14px;
+                                        z-index: 1000;
+                                        text-align: center;
+                                        max-width: 90%;
+                                    }
+                                </style>
+                            </head>
+                            <body>
+                                <embed src="${pdfDataUri}" type="application/pdf">
+                                <div class="instructions">
+                                    📤 Tap the share button above to save to Files
+                                </div>
+                            </body>
+                        </html>
+                    `);
+                    newWindow.document.close();
+                } else {
+                    // If popup blocked, show alert with instructions
+                    alert('Popup blocked! Please allow pop-ups for this site, then tap the share button in the new window to save your invoice.');
+                }
+            };
+
+            // ✅ Universal Download (iOS Compatible)
             const fileName = `TrendOra_Invoice_${invoiceNumber}.pdf`;
+            
+            // Generate PDF as blob and data URI
+            const pdfBlob = doc.output('blob');
+            const pdfDataUri = doc.output('dataurlstring');
             
             // Detect iOS specifically
             const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
             
             if (isIOS) {
-                // iOS Safari: Open in new tab (most reliable method)
-                const pdfDataUri = doc.output('dataurlstring');
-                const newWindow = window.open();
-                
-                if (newWindow) {
-                    newWindow.document.write(
-                        `<html>
-                            <head>
-                                <title>${fileName}</title>
-                                <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                            </head>
-                            <body style="margin:0">
-                                <embed width="100%" height="100%" src="${pdfDataUri}" type="application/pdf">
-                            </body>
-                        </html>`
-                    );
-                    newWindow.document.close();
+                // iOS: Use Web Share API if available (iOS 13+)
+                if (navigator.share && navigator.canShare) {
+                    try {
+                        const file = new File([pdfBlob], fileName, { type: 'application/pdf' });
+                        if (navigator.canShare({ files: [file] })) {
+                            navigator.share({
+                                files: [file],
+                                title: fileName,
+                                text: 'Your TrendOra Invoice'
+                            }).catch(() => {
+                                // Fall through to data URI method if share fails
+                                openPdfForIOS(pdfDataUri, fileName);
+                            });
+                            return;
+                        }
+                    } catch (e) {
+                        // Fall through to data URI method
+                        openPdfForIOS(pdfDataUri, fileName);
+                    }
                 } else {
-                    // Fallback if popup blocked
-                    alert("Please allow pop-ups to download your invoice");
+                    // Use data URI method for older iOS or when share API not available
+                    openPdfForIOS(pdfDataUri, fileName);
                 }
             } else {
                 // Android & Desktop: Use blob download
-                const pdfBlob = doc.output('blob');
                 const url = URL.createObjectURL(pdfBlob);
                 const link = document.createElement('a');
                 link.href = url;
