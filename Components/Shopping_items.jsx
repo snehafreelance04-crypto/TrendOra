@@ -50,6 +50,7 @@ export default function Shopping_items() {
         setCartItems((prev) => prev.filter((item) => item.id !== productId));
     };
 
+    // Convert image to base64 for jsPDF
     const toBase64 = (url) =>
         fetch(url)
             .then((response) => response.blob())
@@ -62,18 +63,26 @@ export default function Shopping_items() {
                     })
             );
 
+    // ===============================
+    // UPDATED INVOICE FUNCTION (with LOGO)
+    // ===============================
     const download = async () => {
         const { jsPDF } = await import("jspdf");
         const doc = new jsPDF();
         let y = 20;
 
+        // Load your TrendOra logo
         const logoBase64 = await toBase64("/Images/Logo1.png");
 
-        doc.setFillColor(37, 99, 235);
+        // Header background
+        doc.setFillColor(37, 99, 235);  // Tailwind blue-600
         doc.rect(0, 0, 210, 45, "F");
 
+
+        // Add Logo (left side)
         doc.addImage(logoBase64, "PNG", 10, 8, 25, 25);
 
+        // Main Title
         doc.setTextColor(255, 255, 255);
         doc.setFont("Helvetica", "bold");
         doc.setFontSize(32);
@@ -178,13 +187,16 @@ export default function Shopping_items() {
         doc.text("TOTAL:", 130, y + 3);
         doc.text(`₹${totalPrice}`, 195, y + 3, { align: "right" });
 
-        // 🔹 Updated: Mobile-safe PDF handling
-        const fileName = `TrendOra_Invoice_${invoiceNumber}.pdf`;
-        if (/Android|iPhone|iPad|iPod/i.test(navigator.userAgent)) {
-            doc.output('dataurlnewwindow');
-        } else {
-            doc.save(fileName);
-        }
+        // Mobile-friendly download approach
+        const pdfBlob = doc.output('blob');
+        const url = URL.createObjectURL(pdfBlob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `TrendOra_Invoice_${invoiceNumber}.pdf`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
     };
 
     const totalPrice = cartItems.reduce(
