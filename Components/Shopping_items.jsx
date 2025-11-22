@@ -207,7 +207,7 @@ export default function Shopping_items() {
                 {/* Cart */}
                 <button
                     onClick={() => setIsCartOpen(!isCartOpen)}
-                    className="relative bg-gradient-to-r from-[#7F7FD5] to-[#91EAE4] text-white ml-[40%] p-4 rounded-full shadow-xl hover:scale-110 transition-all duration-300"
+                    className="relative bg-gradient-to-r from-[#7F7FD5] to-[#91EAE4] text-white  p-4 rounded-full shadow-xl hover:scale-110 transition-all duration-300"
                 >
                     🛒
                     {cartItems.length > 0 && (
