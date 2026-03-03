@@ -1,480 +1,440 @@
 "use client";
+
 import React, { useEffect, useState } from "react";
 import { jsPDF } from "jspdf";
 
 export default function Shopping_items() {
+
     const [data, setData] = useState([]);
     const [categories, setCategories] = useState([]);
     const [activeCategory, setActiveCategory] = useState("all");
     const [cartItems, setCartItems] = useState([]);
     const [isCartOpen, setIsCartOpen] = useState(false);
-    const doc = new jsPDF();
 
     const [addedItemIds, setAddedItemIds] = useState([]);
-    const [showOrderPopup, setShowOrderPopup] = useState(false);
+
+    const [showCreatePopup, setShowCreatePopup] = useState(false);
+
+    // ❌ IMAGE FIELD REMOVED
+    const [newProduct, setNewProduct] = useState({
+        name: "",
+        category: "",
+        price: ""
+    });
+
+
+    // FETCH PRODUCTS
+    const fetchProducts = async () => {
+
+        try {
+
+            const response =
+                await fetch("http://localhost:5000/api/products");
+
+            const json = await response.json();
+
+            setData(json);
+
+            const uniqueCategories =
+                [...new Set(json.map(item => item.category))];
+
+            setCategories(uniqueCategories);
+
+        }
+        catch (error) {
+
+            console.error("Fetch error:", error);
+
+        }
+
+    };
+
 
     useEffect(() => {
-        async function fetchProducts() {
-            const response = await fetch("https://dummyjson.com/products");
-            const json = await response.json();
-            setData(json.products);
-
-            const uniqueCategories = [...new Set(json.products.map(item => item.category))];
-            setCategories(uniqueCategories);
-        }
         fetchProducts();
     }, []);
 
+    useEffect(() => {
+
+        const savedCart = localStorage.getItem("cart");
+
+        if (savedCart) {
+            setCartItems(JSON.parse(savedCart));
+        }
+
+    }, []);
+
+    useEffect(() => {
+
+        if (cartItems.length > 0) {
+            localStorage.setItem("cart", JSON.stringify(cartItems));
+        }
+
+    }, [cartItems]);
+
+
+
+    // CREATE PRODUCT
+    const createProduct = async () => {
+
+        try {
+
+            const response =
+                await fetch("http://localhost:5000/api/products", {
+
+                    method: "POST",
+
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+
+                    body: JSON.stringify({
+                        name: newProduct.name,
+                        category: newProduct.category,
+                        price: Number(newProduct.price)
+                    })
+
+                });
+
+            await response.json();
+
+            setShowCreatePopup(false);
+
+            setNewProduct({
+                name: "",
+                category: "",
+                price: ""
+            });
+
+            fetchProducts();
+
+        }
+        catch (error) {
+
+            console.error("Create error:", error);
+
+        }
+
+    };
+
+
+
+    // FILTER PRODUCTS
     const filteredProducts =
         activeCategory === "all"
             ? data
-            : data.filter((item) => item.category === activeCategory);
+            : data.filter(
+                item => item.category === activeCategory
+            );
 
+
+
+    // ADD TO CART
     const addToCart = (product) => {
-        setCartItems((prev) => {
-            const existingItem = prev.find((item) => item.id === product.id);
-            if (existingItem) {
-                return prev.map((item) =>
-                    item.id === product.id
-                        ? { ...item, quantity: item.quantity + 1 }
+
+        setCartItems(prev => {
+
+            const existing =
+                prev.find(item => item._id === product._id);
+
+            if (existing) {
+
+                return prev.map(item =>
+                    item._id === product._id
+                        ? {
+                            ...item,
+                            quantity: item.quantity + 1
+                        }
                         : item
                 );
+
             }
+
             return [...prev, { ...product, quantity: 1 }];
+
         });
 
-        setAddedItemIds((prev) => [...prev, product.id]);
+        setAddedItemIds(prev =>
+            [...prev, product._id]
+        );
+
     };
 
-    const removeFromCart = (productId) => {
-        setCartItems((prev) => prev.filter((item) => item.id !== productId));
+
+
+    // REMOVE FROM CART
+    const removeFromCart = (id) => {
+
+        setCartItems(prev =>
+            prev.filter(item => item._id !== id)
+        );
+
     };
 
-    // Convert image to base64 for jsPDF
-    const toBase64 = (url) =>
-        fetch(url)
-            .then((response) => response.blob())
-            .then(
-                (blob) =>
-                    new Promise((resolve) => {
-                        const reader = new FileReader();
-                        reader.onloadend = () => resolve(reader.result);
-                        reader.readAsDataURL(blob);
-                    })
-            );
 
-    // ===============================
-    // UPDATED INVOICE FUNCTION (iOS-Compatible)
-    // ===============================
+
+    // PDF DOWNLOAD
     const download = async () => {
-        try {
-            const { jsPDF } = await import("jspdf");
-            const doc = new jsPDF();
-            let y = 20;
 
-            // Load your TrendOra logo
-            const logoBase64 = await toBase64("/Images/Logo1.png");
+        const doc = new jsPDF();
 
-            // Header background
-            doc.setFillColor(37, 99, 235);  // Tailwind blue-600
-            doc.rect(0, 0, 210, 45, "F");
+        let y = 20;
 
-            // Add Logo (left side)
-            doc.addImage(logoBase64, "PNG", 10, 8, 25, 25);
+        doc.text("TrendOra Invoice", 70, y);
 
-            // Main Title
-            doc.setTextColor(255, 255, 255);
-            doc.setFont("Helvetica", "bold");
-            doc.setFontSize(32);
-            doc.text("TrendOra", 110, 20, { align: "center" });
+        y += 20;
 
-            doc.setFontSize(11);
-            doc.setFont("Helvetica", "normal");
-            doc.text("AI-Powered Smart Shopping Experience", 110, 28, { align: "center" });
+        cartItems.forEach(item => {
 
-            doc.setFontSize(9);
-            doc.text("www.trendora.com | support@trendora.com | +91-XXXX-XXXXXX", 110, 35, {
-                align: "center",
-            });
-
-            y = 55;
-
-            doc.setTextColor(0, 0, 0);
-            doc.setFont("Helvetica", "bold");
-            doc.setFontSize(24);
-            doc.text("INVOICE", 10, y);
-
-            doc.setFontSize(10);
-            doc.setFont("Helvetica", "normal");
-            const invoiceNumber = `INV-${Date.now().toString().slice(-8)}`;
-            const invoiceDate = new Date().toLocaleDateString("en-IN", {
-                year: "numeric",
-                month: "long",
-                day: "numeric",
-            });
-
-            doc.text(`Invoice No: ${invoiceNumber}`, 200, y, { align: "right" });
-            doc.text(`Date: ${invoiceDate}`, 200, y + 6, { align: "right" });
-
-            y += 20;
-
-            doc.setDrawColor(220, 220, 220);
-            doc.setLineWidth(0.5);
-            doc.rect(10, y, 190, 20);
-
-            doc.setFont("Helvetica", "bold");
-            doc.setFontSize(11);
-            doc.text("BILL TO:", 15, y + 7);
-
-            doc.setFont("Helvetica", "normal");
-            doc.setFontSize(10);
-            doc.text("Customer Name", 15, y + 13);
-
-            y += 30;
-
-            doc.setFillColor(240, 240, 240);
-            doc.rect(10, y, 190, 8, "F");
-
-            doc.setFont("Helvetica", "bold");
-            doc.setFontSize(12);
-            doc.text("ITEM DESCRIPTION", 15, y + 7);
-            doc.text("QTY", 145, y + 7, { align: "center" });
-            doc.text("PRICE", 165, y + 7, { align: "center" });
-            doc.text("AMOUNT", 198, y + 7, { align: "right" });
-
-            y += 12;
-
-            cartItems.forEach((item, index) => {
-                doc.setDrawColor(220, 220, 220);
-                doc.setLineWidth(0.3);
-                doc.rect(10, y - 5, 190, 8);
-
-                const name = item.title.length > 45 ? item.title.slice(0, 45) + "..." : item.title;
-
-                doc.text(`${index + 1}. ${name}`, 15, y);
-                doc.text(`${item.quantity}`, 145, y, { align: "center" });
-                doc.text(`₹${item.price}`, 165, y, { align: "center" });
-                doc.text(`₹${item.price * item.quantity}`, 195, y, { align: "right" });
-
-                y += 8;
-
-                if (y > 260) {
-                    doc.addPage();
-                    y = 20;
-                }
-            });
-
-            y += 5;
-
-            const totalPrice = cartItems.reduce(
-                (sum, item) => sum + item.price * item.quantity,
-                0
+            doc.text(
+                `${item.name} x${item.quantity}`,
+                10,
+                y
             );
 
-            doc.line(120, y, 200, y);
-            y += 8;
+            doc.text(
+                `₹${item.price * item.quantity}`,
+                150,
+                y
+            );
 
-            doc.text("Subtotal:", 130, y);
-            doc.text(`₹${totalPrice}`, 195, y, { align: "right" });
-            y += 8;
+            y += 10;
 
-            doc.setFillColor(79, 70, 229);
-            doc.rect(120, y - 5, 98, 12, "F");
+        });
 
-            doc.setTextColor(255, 255, 255);
-            doc.setFont("Helvetica", "bold");
-            doc.setFontSize(14);
-            doc.text("TOTAL:", 130, y + 3);
-            doc.text(`₹${totalPrice}`, 195, y + 3, { align: "right" });
+        doc.save("invoice.pdf");
 
-            // ✅ iOS-specific function to open PDF (defined first)
-            const openPdfForIOS = (pdfDataUri, fileName) => {
-                // Open PDF in new window - iOS Safari will show native PDF viewer with share button
-                const newWindow = window.open('', '_blank');
-                
-                if (newWindow) {
-                    newWindow.document.write(`
-                        <!DOCTYPE html>
-                        <html>
-                            <head>
-                                <meta charset="UTF-8">
-                                <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-                                <title>${fileName}</title>
-                                <style>
-                                    body {
-                                        margin: 0;
-                                        padding: 0;
-                                        overflow: hidden;
-                                        background: #000;
-                                    }
-                                    embed {
-                                        width: 100vw;
-                                        height: 100vh;
-                                        border: none;
-                                    }
-                                    .instructions {
-                                        position: fixed;
-                                        bottom: 20px;
-                                        left: 50%;
-                                        transform: translateX(-50%);
-                                        background: rgba(0,0,0,0.8);
-                                        color: white;
-                                        padding: 12px 20px;
-                                        border-radius: 20px;
-                                        font-size: 14px;
-                                        z-index: 1000;
-                                        text-align: center;
-                                        max-width: 90%;
-                                    }
-                                </style>
-                            </head>
-                            <body>
-                                <embed src="${pdfDataUri}" type="application/pdf">
-                                <div class="instructions">
-                                    📤 Tap the share button above to save to Files
-                                </div>
-                            </body>
-                        </html>
-                    `);
-                    newWindow.document.close();
-                } else {
-                    // If popup blocked, show alert with instructions
-                    alert('Popup blocked! Please allow pop-ups for this site, then tap the share button in the new window to save your invoice.');
-                }
-            };
-
-            // ✅ Universal Download (iOS Compatible)
-            const fileName = `TrendOra_Invoice_${invoiceNumber}.pdf`;
-            
-            // Generate PDF as blob and data URI
-            const pdfBlob = doc.output('blob');
-            const pdfDataUri = doc.output('dataurlstring');
-            
-            // Detect iOS specifically
-            const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
-            
-            if (isIOS) {
-                // iOS: Use Web Share API if available (iOS 13+)
-                if (navigator.share && navigator.canShare) {
-                    try {
-                        const file = new File([pdfBlob], fileName, { type: 'application/pdf' });
-                        if (navigator.canShare({ files: [file] })) {
-                            navigator.share({
-                                files: [file],
-                                title: fileName,
-                                text: 'Your TrendOra Invoice'
-                            }).catch(() => {
-                                // Fall through to data URI method if share fails
-                                openPdfForIOS(pdfDataUri, fileName);
-                            });
-                            return;
-                        }
-                    } catch (e) {
-                        // Fall through to data URI method
-                        openPdfForIOS(pdfDataUri, fileName);
-                    }
-                } else {
-                    // Use data URI method for older iOS or when share API not available
-                    openPdfForIOS(pdfDataUri, fileName);
-                }
-            } else {
-                // Android & Desktop: Use blob download
-                const url = URL.createObjectURL(pdfBlob);
-                const link = document.createElement('a');
-                link.href = url;
-                link.download = fileName;
-                link.style.display = 'none';
-                document.body.appendChild(link);
-                
-                // Trigger download
-                link.click();
-                
-                // Cleanup
-                setTimeout(() => {
-                    document.body.removeChild(link);
-                    URL.revokeObjectURL(url);
-                }, 100);
-            }
-
-        } catch (error) {
-            console.error("Error generating invoice:", error);
-            alert("Failed to generate invoice. Please try again.");
-        }
     };
 
-    const totalPrice = cartItems.reduce(
-        (sum, item) => sum + item.price * item.quantity,
-        0
-    );
+
+
+    const totalPrice =
+        cartItems.reduce(
+            (sum, item) =>
+                sum + item.price * item.quantity,
+            0
+        );
+
+
 
     return (
-        <div className="p-10 min-h-screen bg-gradient-to-b from-[#EEF1F5] to-[#CBD5E1]">
 
-            {/* Header */}
+        <div className="p-10">
+
+
+            {/* HEADER */}
             <div className="flex items-center mb-10">
-                <h1 className="text-4xl ml-24 md:text-6xl font-extrabold tracking-wide leading-tight bg-gradient-to-r from-[#c83420] via-[#1d528f] to-[#f33fdb] text-transparent bg-clip-text">
+
+                <button
+                    onClick={() => setShowCreatePopup(true)}
+                    className="bg-blue-600 text-white px-4 py-2 rounded"
+                >
+                    Create
+                </button>
+
+
+                <h1 className="text-4xl ml-10">
                     Shop by Category
                 </h1>
 
-                {/* Cart */}
+
                 <button
                     onClick={() => setIsCartOpen(!isCartOpen)}
-                    className="relative bg-gradient-to-r from-[#7F7FD5] to-[#91EAE4] text-white ml-0 lg:ml-[40%] p-4 rounded-full shadow-xl hover:scale-110 transition-all duration-300"
+                    className="ml-auto bg-blue-500 text-white p-3 rounded"
                 >
-                    🛒
-                    {cartItems.length > 0 && (
-                        <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full w-6 h-6 flex items-center justify-center font-bold">
-                            {cartItems.length}
-                        </span>
-                    )}
+                    Cart ({cartItems.length})
                 </button>
+
             </div>
 
-            {/* CART SIDEBAR */}
-            {isCartOpen && (
-                <div
-                    className="fixed inset-0 bg-black bg-opacity-20 z-40"
-                    onClick={() => setIsCartOpen(false)}
-                ></div>
-            )}
 
-            <div
-                className={`fixed top-0  right-0 h-full w-full sm:w-96 bg-white shadow-2xl z-50 transform transition-transform duration-300 ${isCartOpen ? "translate-x-0" : "translate-x-full"
-                    } overflow-y-auto`}
-            >
-                <div className="p-6">
-                    <h2 className="text-2xl font-bold mb-4">Shopping Cart</h2>
 
-                    {/* Empty Cart */}
-                    {cartItems.length === 0 ? (
-                        <p className="text-gray-600 text-center mt-10">Your cart is empty</p>
-                    ) : (
-                        <>
-                            {cartItems.map((item) => (
-                                <div key={item.id} className="flex items-center gap-4 border-b pb-4 mb-4">
-                                    <img src={item.thumbnail} className="w-16 h-16 rounded" />
-                                    <div className="flex-1">
-                                        <p className="font-semibold">{item.title}</p>
-                                        <p>₹{item.price} × {item.quantity}</p>
-                                    </div>
-                                    <button onClick={() => removeFromCart(item.id)} className="text-red-500 text-xl">
-                                        🗑️
-                                    </button>
-                                </div>
-                            ))}
+            {/* CATEGORY FILTER */}
+            <div className="flex gap-3 mb-6">
 
-                            {/* Total */}
-                            <div className="pt-4 border-t-2">
-                                <p className="text-2xl font-bold">Total: ₹{totalPrice}</p>
-
-                                {/* Checkout Button */}
-                                <button
-                                    onClick={() => setShowOrderPopup(true)}
-                                    className="w-full mt-4 bg-gradient-to-r from-[#7F7FD5] to-[#91EAE4] text-black py-3 rounded-full font-bold hover:scale-105 transition-all"
-                                >
-                                    Checkout
-                                </button>
-
-                                {/* Invoice Button */}
-                                <button
-                                    onClick={download}
-                                    className="w-full mt-3 bg-gradient-to-r from-[#7F7FD5] to-[#91EAE4] text-black py-3 rounded-full font-bold hover:scale-105 transition-all"
-                                >
-                                    Get Your Invoice
-                                </button>
-                            </div>
-                        </>
-                    )}
-                </div>
-            </div>
-
-            {/* CATEGORY BUTTONS */}
-            <div className="flex flex-wrap gap-4 justify-center mb-12">
                 <button
                     onClick={() => setActiveCategory("all")}
-                    className={`px-6 py-2 rounded-full font-semibold ${activeCategory === "all"
-                            ? "bg-gradient-to-r from-[#86A8E7] to-[#91EAE4] text-white scale-110"
-                            : "bg-white/60 border"
-                        }`}
+                    className="bg-gray-200 px-3 py-1 rounded"
                 >
-                    All Products
+                    All
                 </button>
 
-                {categories.map((cat) => (
+                {categories.map(cat => (
+
                     <button
                         key={cat}
                         onClick={() => setActiveCategory(cat)}
-                        className={`px-6 py-2 rounded-full font-semibold ${activeCategory === cat
-                                ? "bg-gradient-to-r from-[#7F7FD5] to-[#91EAE4] text-white scale-110"
-                                : "bg-white/70 border"
-                            }`}
+                        className="bg-gray-200 px-3 py-1 rounded"
                     >
                         {cat}
                     </button>
+
                 ))}
+
             </div>
 
-            {/* PRODUCTS GRID */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-10">
-                {filteredProducts.map((item) => (
-                    <div
-                        key={item.id}
-                        className="bg-white p-5 rounded-2xl shadow-lg hover:shadow-2xl hover:scale-[1.04] transition-all"
-                    >
-                        <img src={item.thumbnail} className="w-full h-48 object-cover rounded-xl" />
 
-                        <h2 className="text-lg font-bold mt-4">{item.title}</h2>
 
-                        <p className="text-sm text-[#7F7FD5] capitalize">{item.category}</p>
+            {/* CART */}
+            {isCartOpen && (
 
-                        <p className="text-gray-600 text-sm mt-2 line-clamp-2">{item.description}</p>
+                <div className="fixed right-0 top-0 bg-white w-80 h-full p-5 shadow">
 
-                        <div className="flex items-center justify-between mt-3">
-                            <p className="font-extrabold text-xl">₹{item.price}</p>
+                    <h2 className="text-xl font-bold mb-4">
+                        Cart
+                    </h2>
 
-                            {/* ADD TO CART BUTTON */}
+                    {cartItems.map(item => (
+
+                        <div key={item._id} className="mb-2">
+
+                            <p>{item.name}</p>
+
+                            <p>
+                                ₹{item.price} × {item.quantity}
+                            </p>
+
                             <button
-                                onClick={() => addToCart(item)}
-                                className={`px-4 py-2 rounded-full text-sm transition-all ${addedItemIds.includes(item.id)
-                                        ? "bg-green-600 text-white scale-105"
-                                        : "bg-blue-900 text-white hover:bg-blue-800"
-                                    }`}
+                                onClick={() =>
+                                    removeFromCart(item._id)
+                                }
+                                className="text-red-500"
                             >
-                                {addedItemIds.includes(item.id)
-                                    ? "Added to cart ✓"
-                                    : "Add to cart"}
+                                Remove
                             </button>
+
                         </div>
-                    </div>
-                ))}
-            </div>
 
-            {/* ORDER PLACED POPUP */}
-            {showOrderPopup && (
-                <div className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm flex justify-center items-center z-[9999]">
-                    <div className="bg-white p-8 rounded-2xl shadow-2xl w-[90%] sm:w-[400px] text-center animate-fadeIn">
+                    ))}
 
-                        <div className="text-green-600 text-6xl mb-4">✓</div>
+                    <p className="font-bold mt-4">
+                        Total ₹{totalPrice}
+                    </p>
 
-                        <h2 className="text-2xl font-extrabold text-gray-800">
-                            Order Placed Successfully!
+                    <button
+                        onClick={download}
+                        className="bg-green-500 text-white p-2 mt-3"
+                    >
+                        Download Invoice
+                    </button>
+
+                </div>
+
+            )}
+
+
+
+            {/* PRODUCTS */}
+            <div className="grid grid-cols-4 gap-5">
+
+                {filteredProducts.map(item => (
+
+                    <div
+                        key={item._id}
+                        className="border p-3 rounded"
+                    >
+
+                        <h2 className="font-bold">
+                            {item.name}
                         </h2>
 
-                        <p className="text-gray-600 mt-2 text-sm leading-relaxed">
-                            Thank you for shopping with{" "}
-                            <span className="font-semibold">TrendOra</span>.
-                            Your order has been received.
-                        </p>
+                        <p>{item.category}</p>
+
+                        <p>₹{item.price}</p>
 
                         <button
-                            onClick={() => setShowOrderPopup(false)}
-                            className="mt-6 w-full py-3 rounded-full bg-gradient-to-r from-[#7F7FD5] to-[#91EAE4] text-white font-bold hover:scale-105 transition-all"
+                            onClick={() => addToCart(item)}
+                            className="bg-blue-500 text-white p-2 mt-2"
                         >
-                            Continue Shopping
+                            Add to Cart
                         </button>
+
                     </div>
+
+                ))}
+
+            </div>
+
+
+
+            {/* CREATE PRODUCT POPUP */}
+            {showCreatePopup && (
+
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
+
+                    <div className="bg-white p-6 w-96 rounded">
+
+                        <h2 className="text-xl font-bold mb-3">
+                            Create Product
+                        </h2>
+
+
+                        <input
+                            placeholder="Name"
+                            className="border p-2 w-full mb-2"
+                            value={newProduct.name}
+                            onChange={(e) =>
+                                setNewProduct({
+                                    ...newProduct,
+                                    name: e.target.value
+                                })
+                            }
+                        />
+
+
+                        <input
+                            placeholder="Category"
+                            className="border p-2 w-full mb-2"
+                            value={newProduct.category}
+                            onChange={(e) =>
+                                setNewProduct({
+                                    ...newProduct,
+                                    category: e.target.value
+                                })
+                            }
+                        />
+
+
+                        <input
+                            placeholder="Price"
+                            className="border p-2 w-full mb-3"
+                            value={newProduct.price}
+                            onChange={(e) =>
+                                setNewProduct({
+                                    ...newProduct,
+                                    price: e.target.value
+                                })
+                            }
+                        />
+
+
+                        <div className="flex gap-3">
+
+                            <button
+                                onClick={createProduct}
+                                className="bg-blue-600 text-white px-4 py-2 rounded"
+                            >
+                                Save
+                            </button>
+
+
+                            <button
+                                onClick={() => setShowCreatePopup(false)}
+                                className="bg-gray-500 text-white px-4 py-2 rounded"
+                            >
+                                Cancel
+                            </button>
+
+                        </div>
+
+                    </div>
+
                 </div>
+
             )}
+
         </div>
+
     );
+
 }

@@ -13,6 +13,55 @@ import {
   faEyeSlash,
 } from "@fortawesome/free-solid-svg-icons";
 
+// ─── AUTH CONFIG ──────────────────────────────────────────────────────────────
+// Change this to your actual backend URL
+const API_BASE_URL = "http://127.0.0.1:5000";
+
+// Auth helper functions
+const authService = {
+  // Call your backend login endpoint
+  async login(email, password) {
+    const response = await fetch(`${API_BASE_URL}/api/auth/login`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ email, password }),
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.message || "Login failed");
+    }
+
+    return data; // expects { token, user: { email, name, ... } }
+  },
+
+  // Save token & user info
+  saveSession(token, user) {
+    sessionStorage.setItem("loginStatus", "true");
+    sessionStorage.setItem("userEmail", user?.email || "");
+    sessionStorage.setItem("authToken", token);
+    sessionStorage.setItem("userData", JSON.stringify(user));
+
+    // Also save in localStorage for persistent sessions (optional)
+    localStorage.setItem("authToken", token);
+  },
+
+  // Get token (use this in other pages for API calls)
+  getToken() {
+    return sessionStorage.getItem("authToken") || localStorage.getItem("authToken");
+  },
+
+  // Clear session on logout
+  clearSession() {
+    sessionStorage.clear();
+    localStorage.removeItem("authToken");
+  },
+};
+// ─────────────────────────────────────────────────────────────────────────────
+
 const Login = () => {
   const router = useRouter();
 
@@ -21,19 +70,41 @@ const Login = () => {
   const [email, setEmail] = useState("");
   const [pass, setPass] = useState("");
 
-  const login = () => {
+  // ── NEW auth states (added without touching old logic)
+  const [loading, setLoading] = useState(false);
+  const [authError, setAuthError] = useState("");
+
+  const login = async () => {
     if (!email || !pass) return alert("Fill both fields!");
 
-    // ✅ FIXED: Store in sessionStorage with correct key name
-    sessionStorage.setItem("loginStatus", "true");
-    sessionStorage.setItem("userEmail", email);
+    // ── NEW: clear previous errors
+    setAuthError("");
+    setLoading(true);
 
-    setPopup(true);
+    try {
+      // ── NEW: call backend for authentication
+      const { token, user } = await authService.login(email, pass);
 
-    // small animation delay
-    setTimeout(() => {
-      router.push("/shopping"); // go to shopping page
-    }, 500);
+      // ── NEW: save token & session
+      authService.saveSession(token, user);
+
+      // ✅ FIXED: Store in sessionStorage with correct key name (original logic preserved)
+      sessionStorage.setItem("loginStatus", "true");
+      sessionStorage.setItem("userEmail", email);
+
+      setPopup(true);
+
+      // small animation delay (original logic preserved)
+      setTimeout(() => {
+        router.push("/shopping"); // go to shopping page
+      }, 500);
+
+    } catch (error) {
+      // ── NEW: show error from backend
+      setAuthError(error.message || "Invalid email or password");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -87,6 +158,10 @@ const Login = () => {
           0%, 100% { opacity: 0.3; transform: scale(0.8); }
           50% { opacity: 1; transform: scale(1.2); }
         }
+        @keyframes spin {
+          from { transform: rotate(0deg); }
+          to { transform: rotate(360deg); }
+        }
         .shimmer-bg {
           background: linear-gradient(90deg, 
             rgba(168, 85, 247, 0.4) 0%, 
@@ -94,6 +169,17 @@ const Login = () => {
             rgba(168, 85, 247, 0.4) 100%);
           background-size: 2000px 100%;
           animation: shimmer 3s infinite linear;
+        }
+        .spinner {
+          display: inline-block;
+          width: 18px;
+          height: 18px;
+          border: 2px solid rgba(255,255,255,0.4);
+          border-top-color: white;
+          border-radius: 50%;
+          animation: spin 0.7s linear infinite;
+          vertical-align: middle;
+          margin-right: 8px;
         }
       `}</style>
 
@@ -111,32 +197,26 @@ const Login = () => {
         <div className="absolute top-[25%] right-[13%] text-7xl drop-shadow-lg animate-[float_7s_ease-in-out_infinite]" style={{filter: 'drop-shadow(0 0 10px rgba(168, 85, 247, 0.5))'}}>
           🛒
         </div>
-      
-        
 
         {/* Shopping Bags */}
         <div className="absolute top-[45%] left-[12%] text-7xl drop-shadow-2xl animate-[float_7s_ease-in-out_infinite]" style={{filter: 'drop-shadow(0 0 20px rgba(236, 72, 153, 0.7))'}}>
           🛍️
         </div>
-       
 
         {/* Price Tags */}
         <div className="absolute top-[45%] right-[8%] text-7xl drop-shadow-xl animate-[tagSwing_3s_ease-in-out_infinite]" style={{filter: 'drop-shadow(0 0 12px rgba(239, 68, 68, 0.6))'}}>
           🏷️
         </div>
-        
 
         {/* Credit Cards */}
         <div className="absolute top-[35%] left-[20%] text-6xl drop-shadow-lg animate-[float_8s_ease-in-out_infinite_2s]" style={{filter: 'drop-shadow(0 0 10px rgba(59, 130, 246, 0.6))'}}>
           💳
         </div>
-        
 
         {/* Gift Boxes */}
         <div className="absolute top-[55%] right-[22%] text-7xl drop-shadow-2xl animate-[packageBounce_6s_ease-in-out_infinite_2s]" style={{filter: 'drop-shadow(0 0 15px rgba(236, 72, 153, 0.7))'}}>
           🎁
         </div>
-    
 
         {/* Back Button */}
         <Link
@@ -211,14 +291,30 @@ const Login = () => {
             </button>
           </div>
 
+          {/* ── NEW: Auth Error Message */}
+          {authError && (
+            <div className="mb-4 px-4 py-2 bg-red-50 border border-red-300 rounded-lg text-red-600 text-sm text-center animate-[fadeInUp_0.3s_ease-out]">
+              ⚠️ {authError}
+            </div>
+          )}
+
           {/* LOGIN BUTTON */}
           <button
             onClick={login}
-            className="w-full py-3 rounded-lg text-white font-semibold text-lg
+            disabled={loading}
+            className={`w-full py-3 rounded-lg text-white font-semibold text-lg
             bg-gradient-to-r from-purple-500 via-pink-500 to-purple-500 bg-size-200
-            hover:bg-right  hover:text-black relative overflow-hidden group"
+            hover:bg-right hover:text-black relative overflow-hidden group
+            ${loading ? "opacity-70 cursor-not-allowed" : ""}`}
           >
-            <span className="relative z-10">Login</span>
+            {/* ── NEW: Loading spinner */}
+            {loading ? (
+              <span className="relative z-10 flex items-center justify-center gap-2">
+                <span className="spinner"></span> Verifying...
+              </span>
+            ) : (
+              <span className="relative z-10">Login</span>
+            )}
             <div className="absolute inset-0 bg-gradient-to-r from-pink-500 via-purple-500 to-pink-500 
             opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
           </button>

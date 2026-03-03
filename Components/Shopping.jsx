@@ -1,31 +1,41 @@
 "use client";
 
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Shopping_items from "./Shopping_items";
 
-const Shopping = () => {
+export default function Shopping() {
+
   const router = useRouter();
 
-  useEffect(() => {
-    const isLogged = sessionStorage.getItem("loginStatus");
+  const [isLogged, setIsLogged] = useState(false);
+  const [loading, setLoading] = useState(true);
 
-    if (isLogged !== "true") {
-      router.replace("/login");     // Prevent access
+
+  useEffect(() => {
+
+    const loginStatus = sessionStorage.getItem("loginStatus");
+
+    if (loginStatus === "true") {
+
+      setIsLogged(true);
+
+    } else {
+
+      router.replace("/login");
+
     }
+
+    setLoading(false);
+
   }, []);
 
-  const isLogged = typeof window !== "undefined" 
-    ? sessionStorage.getItem("loginStatus")
-    : null;
 
-  if (isLogged !== "true") return null; // Prevent UI flash
+  if (loading) return null;
 
-  return (
-    <div>
-      <Shopping_items />
-    </div>
-  );
-};
+  if (!isLogged) return null;
 
-export default Shopping;
+
+  return <Shopping_items />;
+
+}
